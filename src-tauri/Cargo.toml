@@ -7,7 +7,9 @@ edition = "2021"
 
 [lib]
 name = "kuro_cat_pet_lib"
-crate-type = ["staticlib", "cdylib", "rlib"]
+# Linux desktop only needs the rlib; staticlib/cdylib are mobile targets and
+# produce ~1 GB of extra artifacts per build.
+crate-type = ["rlib"]
 
 [[bin]]
 name = "KuroCat"
@@ -53,7 +55,9 @@ windows = { version = "0.58", features = [
 
 [profile.release]
 panic = "abort"
-codegen-units = 1
-lto = true
+# Low-memory machine (2 cores / 3.5 GB): fat LTO with one codegen unit fails
+# during linking, so use thin LTO and more codegen units.
+codegen-units = 8
+lto = "thin"
 opt-level = "s"
 strip = true
